@@ -8,6 +8,10 @@
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
+#include <cstdint>
+#include <cstdio>
+
+extern uint64_t rdtsc();
 
 using namespace std;
 
@@ -1132,6 +1136,7 @@ namespace seal
 
         void RNSTool::decrypt_scale_and_round(ConstRNSIter input, CoeffIter destination, MemoryPoolHandle pool) const
         {
+            uint64_t rdtsc_start = rdtsc();
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
@@ -1198,6 +1203,12 @@ namespace seal
                     get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
                 }
             });
+
+            uint64_t rdtsc_end = rdtsc();
+            std::printf(
+                "[rdtsc] RNSTool::decrypt_scale_and_round start=%llu end=%llu elapsed=%llu\n",
+                static_cast<unsigned long long>(rdtsc_start), static_cast<unsigned long long>(rdtsc_end),
+                static_cast<unsigned long long>(rdtsc_end - rdtsc_start));
         }
 
         void RNSTool::mod_t_and_divide_q_last_ntt_inplace(

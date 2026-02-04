@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 #include "seal/decryptor.h"
+#include "seal/cacheops/cacheutils.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
 #include "seal/util/polyarithsmallmod.h"
@@ -10,6 +11,7 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/uintcore.h"
 #include <algorithm>
+#include <cstdio>
 #include <stdexcept>
 
 using namespace std;
@@ -298,6 +300,7 @@ namespace seal
     // Store result in destination in RNS form.
     void Decryptor::dot_product_ct_sk_array(const Ciphertext &encrypted, RNSIter destination, MemoryPoolHandle pool)
     {
+        uint64_t rdtsc_start = rdtsc();
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
@@ -378,6 +381,12 @@ namespace seal
             // Finally add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
             add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
         }
+
+        uint64_t rdtsc_end = rdtsc();
+        std::printf(
+            "[rdtsc] Decryptor::dot_product_ct_sk_array start=%llu end=%llu elapsed=%llu\n",
+            static_cast<unsigned long long>(rdtsc_start), static_cast<unsigned long long>(rdtsc_end),
+            static_cast<unsigned long long>(rdtsc_end - rdtsc_start));
     }
 
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
