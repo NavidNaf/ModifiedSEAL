@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/decryptor.h"
-#include "seal/cacheops/cacheutils.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
 #include "seal/util/polyarithsmallmod.h"
@@ -11,8 +10,11 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/uintcore.h"
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
 #include <stdexcept>
+
+extern uint64_t rdtsc();
 
 using namespace std;
 using namespace seal::util;
