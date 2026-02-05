@@ -14,7 +14,8 @@
 #include <cstdio>
 #include <stdexcept>
 
-extern uint64_t rdtsc();
+extern uint64_t rdtsc_begin();
+extern uint64_t rdtsc_end();
 
 using namespace std;
 using namespace seal::util;
@@ -302,7 +303,7 @@ namespace seal
     // Store result in destination in RNS form.
     void Decryptor::dot_product_ct_sk_array(const Ciphertext &encrypted, RNSIter destination, MemoryPoolHandle pool)
     {
-        uint64_t rdtsc_start = rdtsc();
+        const std::uint64_t start_cycles = rdtsc_begin();
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
@@ -384,11 +385,12 @@ namespace seal
             add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
         }
 
-        uint64_t rdtsc_end = rdtsc();
+        const std::uint64_t end_cycles = rdtsc_end();
+        const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
         std::printf(
             "[rdtsc] Decryptor::dot_product_ct_sk_array start=%llu end=%llu elapsed=%llu\n",
-            static_cast<unsigned long long>(rdtsc_start), static_cast<unsigned long long>(rdtsc_end),
-            static_cast<unsigned long long>(rdtsc_end - rdtsc_start));
+            static_cast<unsigned long long>(start_cycles), static_cast<unsigned long long>(end_cycles),
+            static_cast<unsigned long long>(decrypt_cycles));
     }
 
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)

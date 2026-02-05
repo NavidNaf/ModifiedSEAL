@@ -11,7 +11,8 @@
 #include <cstdint>
 #include <cstdio>
 
-extern uint64_t rdtsc();
+extern uint64_t rdtsc_begin();
+extern uint64_t rdtsc_end();
 
 using namespace std;
 
@@ -1136,7 +1137,7 @@ namespace seal
 
         void RNSTool::decrypt_scale_and_round(ConstRNSIter input, CoeffIter destination, MemoryPoolHandle pool) const
         {
-            uint64_t rdtsc_start = rdtsc();
+            const std::uint64_t start_cycles = rdtsc_begin();
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
@@ -1204,11 +1205,12 @@ namespace seal
                 }
             });
 
-            uint64_t rdtsc_end = rdtsc();
+            const std::uint64_t end_cycles = rdtsc_end();
+            const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
             std::printf(
                 "[rdtsc] RNSTool::decrypt_scale_and_round start=%llu end=%llu elapsed=%llu\n",
-                static_cast<unsigned long long>(rdtsc_start), static_cast<unsigned long long>(rdtsc_end),
-                static_cast<unsigned long long>(rdtsc_end - rdtsc_start));
+                static_cast<unsigned long long>(start_cycles), static_cast<unsigned long long>(end_cycles),
+                static_cast<unsigned long long>(decrypt_cycles));
         }
 
         void RNSTool::mod_t_and_divide_q_last_ntt_inplace(
