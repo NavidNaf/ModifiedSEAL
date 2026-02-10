@@ -354,15 +354,26 @@ namespace seal
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, ntt_tables, destination), coeff_modulus_size,
                     [&](auto I) {
+                        // t1.2.1 start
                         set_uint(get<1>(I), coeff_count, get<5>(I));
+                        // t1.2.1 end
+                        // t1.2.2 start
                         // Transform c_1 to NTT form
                         ntt_negacyclic_harvey_lazy(get<5>(I), get<4>(I));
+                        // t1.2.2 end
+                        // t1.2.3 start
                         // put < c_1 * s > mod q in destination
                         dyadic_product_coeffmod(get<5>(I), get<2>(I), coeff_count, get<3>(I), get<5>(I));
+                        // t1.2.3 emd
+                        // t1.2.4 start
                         // Transform back
                         inverse_ntt_negacyclic_harvey(get<5>(I), get<4>(I));
+                        // t1.2.4 end
+                        // t1.2.5 start
                         // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
                         add_poly_coeffmod(get<5>(I), get<0>(I), coeff_count, get<3>(I), get<5>(I));
+                        // t1.2.5 end
+                        // print t1.2.1, t1.2.2, t1.2.3, t1.2.4, t1.2.5 
                     });
                 // t1.2 end here
                 const std::uint64_t t1_2_end = rdtsc_end();
