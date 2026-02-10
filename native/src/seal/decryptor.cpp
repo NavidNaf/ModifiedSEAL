@@ -391,9 +391,10 @@ namespace seal
         }
 
         const std::uint64_t branch_exit_cycles = rdtsc_end();
+        const std::uint64_t branch_total_cycles = branch_exit_cycles - branch_entry_cycles;
         std::printf(
-            "[rdtsc] Decryptor::dot_product_ct_sk_array branch_exit=%llu\n",
-            static_cast<unsigned long long>(branch_exit_cycles));
+            "[rdtsc] Decryptor::dot_product_ct_sk_array branch_total=%llu\n",
+            static_cast<unsigned long long>(branch_total_cycles));
 
         const std::uint64_t end_cycles = rdtsc_end();
         const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
