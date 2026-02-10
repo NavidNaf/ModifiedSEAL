@@ -332,6 +332,8 @@ namespace seal
             const std::uint64_t t1_start = rdtsc_begin();
             if (is_ntt_form)
             {
+                // t1.1 start here
+                const std::uint64_t t1_1_start = rdtsc_begin();
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, destination), coeff_modulus_size, [&](auto I) {
                         // put < c_1 * s > mod q in destination
@@ -339,9 +341,16 @@ namespace seal
                         // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
                         add_poly_coeffmod(get<4>(I), get<0>(I), coeff_count, get<3>(I), get<4>(I));
                     });
+                // t1.1 end here
+                const std::uint64_t t1_1_end = rdtsc_end();
+                std::printf(
+                    "[rdtsc] Decryptor::dot_product_ct_sk_array t1.1=%llu\n",
+                    static_cast<unsigned long long>(t1_1_end - t1_1_start));
             }
             else
             {
+                // t1.2 start here
+                const std::uint64_t t1_2_start = rdtsc_begin();
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, ntt_tables, destination), coeff_modulus_size,
                     [&](auto I) {
@@ -355,6 +364,11 @@ namespace seal
                         // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
                         add_poly_coeffmod(get<5>(I), get<0>(I), coeff_count, get<3>(I), get<5>(I));
                     });
+                // t1.2 end here
+                const std::uint64_t t1_2_end = rdtsc_end();
+                std::printf(
+                    "[rdtsc] Decryptor::dot_product_ct_sk_array t1.2=%llu\n",
+                    static_cast<unsigned long long>(t1_2_end - t1_2_start));
             }
             // t1 end add here
             const std::uint64_t t1_end = rdtsc_end();
