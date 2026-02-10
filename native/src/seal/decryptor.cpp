@@ -355,24 +355,49 @@ namespace seal
                     iter(c0, c1, secret_key_array, coeff_modulus, ntt_tables, destination), coeff_modulus_size,
                     [&](auto I) {
                         // t1.2.1 start
+                        const std::uint64_t t1_2_1_start = rdtsc_begin();
                         set_uint(get<1>(I), coeff_count, get<5>(I));
                         // t1.2.1 end
+                        const std::uint64_t t1_2_1_end = rdtsc_end();
+                        std::printf(
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array t1.2.1=%llu\n",
+                            static_cast<unsigned long long>(t1_2_1_end - t1_2_1_start));
                         // t1.2.2 start
+                        const std::uint64_t t1_2_2_start = rdtsc_begin();
                         // Transform c_1 to NTT form
                         ntt_negacyclic_harvey_lazy(get<5>(I), get<4>(I));
                         // t1.2.2 end
+                        const std::uint64_t t1_2_2_end = rdtsc_end();
+                        std::printf(
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array t1.2.2=%llu\n",
+                            static_cast<unsigned long long>(t1_2_2_end - t1_2_2_start));
                         // t1.2.3 start
+                        const std::uint64_t t1_2_3_start = rdtsc_begin();
                         // put < c_1 * s > mod q in destination
                         dyadic_product_coeffmod(get<5>(I), get<2>(I), coeff_count, get<3>(I), get<5>(I));
                         // t1.2.3 emd
+                        const std::uint64_t t1_2_3_end = rdtsc_end();
+                        std::printf(
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array t1.2.3=%llu\n",
+                            static_cast<unsigned long long>(t1_2_3_end - t1_2_3_start));
                         // t1.2.4 start
+                        const std::uint64_t t1_2_4_start = rdtsc_begin();
                         // Transform back
                         inverse_ntt_negacyclic_harvey(get<5>(I), get<4>(I));
                         // t1.2.4 end
+                        const std::uint64_t t1_2_4_end = rdtsc_end();
+                        std::printf(
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array t1.2.4=%llu\n",
+                            static_cast<unsigned long long>(t1_2_4_end - t1_2_4_start));
                         // t1.2.5 start
+                        const std::uint64_t t1_2_5_start = rdtsc_begin();
                         // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
                         add_poly_coeffmod(get<5>(I), get<0>(I), coeff_count, get<3>(I), get<5>(I));
                         // t1.2.5 end
+                        const std::uint64_t t1_2_5_end = rdtsc_end();
+                        std::printf(
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array t1.2.5=%llu\n",
+                            static_cast<unsigned long long>(t1_2_5_end - t1_2_5_start));
                         // print t1.2.1, t1.2.2, t1.2.3, t1.2.4, t1.2.5 
                     });
                 // t1.2 end here
