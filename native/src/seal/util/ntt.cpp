@@ -406,7 +406,7 @@ namespace seal
             intel::seal_ext::compute_forward_ntt(operand, N, p, root, 4, 4);
             // [ntt] t1.1 end
             const std::uint64_t t1_1_end = rdtsc_end();
-            std::printf("[ntt] ntt_negacyclic_harvey_lazy t1.1=%llu\n",
+            std::printf("[ntt] ntt_negacyclic_harvey_lazy hexl_compute_forward_ntt=%llu\n",
                 static_cast<unsigned long long>(t1_1_end - t1_1_start));
             // [ntt] t1.2 start
 #else
@@ -415,12 +415,12 @@ namespace seal
                 operand.ptr(), tables.coeff_count_power(), tables.get_from_root_powers());
             // [ntt] t1.2 end
             const std::uint64_t t1_2_end = rdtsc_end();
-            std::printf("[ntt] ntt_negacyclic_harvey_lazy t1.2=%llu\n",
+            std::printf("[ntt] ntt_negacyclic_harvey_lazy transform_to_rev=%llu\n",
                 static_cast<unsigned long long>(t1_2_end - t1_2_start));
             // [ntt] t1.3 start
             const std::uint64_t t1_3_start = rdtsc_begin();
             const std::uint64_t t1_3_end = rdtsc_end();
-            std::printf("[ntt] ntt_negacyclic_harvey_lazy t1.3=%llu\n",
+            std::printf("[ntt] ntt_negacyclic_harvey_lazy post_transform_noop=%llu\n",
                 static_cast<unsigned long long>(t1_3_end - t1_3_start));
             // [ntt] t1.3 end
 #endif
