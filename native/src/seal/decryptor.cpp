@@ -424,47 +424,26 @@ namespace seal
             set_poly_array(encrypted.data(1), encrypted_size - 1, coeff_count, coeff_modulus_size, encrypted_copy);
 
             // Transform c_1, c_2, ... to NTT form unless they already are
-            // t2 start add here
-            const std::uint64_t t2_start = rdtsc_begin();
             if (!is_ntt_form)
             {
                 ntt_negacyclic_harvey_lazy(encrypted_copy, encrypted_size - 1, ntt_tables);
             }
-            // t2 end add here
-            const std::uint64_t t2_end = rdtsc_end();
-            std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array [2][forward_ntt_encrypted_copy_if_needed]=%llu\n",
-                static_cast<unsigned long long>(t2_end - t2_start));
             // Compute dyadic product with secret power array
-            // t3 start add here
-            const std::uint64_t t3_start = rdtsc_begin();
             auto secret_key_array = PolyIter(secret_key_array_.get(), coeff_count, key_coeff_modulus_size);
             SEAL_ITERATE(iter(encrypted_copy, secret_key_array), encrypted_size - 1, [&](auto I) {
                 dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_modulus_size, coeff_modulus, get<0>(I));
             });
-            // t3 end add here
-            const std::uint64_t t3_end = rdtsc_end();
-            std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array [3][dyadic_product_secret_powers]=%llu\n",
-                static_cast<unsigned long long>(t3_end - t3_start));
             // Aggregate all polynomials together to complete the dot product
             set_zero_poly(coeff_count, coeff_modulus_size, destination);
             SEAL_ITERATE(encrypted_copy, encrypted_size - 1, [&](auto I) {
                 add_poly_coeffmod(destination, I, coeff_modulus_size, coeff_modulus, destination);
             });
 
-            // t4 start add here
-            const std::uint64_t t4_start = rdtsc_begin();
             if (!is_ntt_form)
             {
                 // If the input was not in NTT form, need to transform back
                 inverse_ntt_negacyclic_harvey(destination, coeff_modulus_size, ntt_tables);
             }
-            // t4 end add here
-            const std::uint64_t t4_end = rdtsc_end();
-            std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array [4][inverse_ntt_result_if_needed]=%llu\n",
-                static_cast<unsigned long long>(t4_end - t4_start));
 
             // Finally add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
             add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
