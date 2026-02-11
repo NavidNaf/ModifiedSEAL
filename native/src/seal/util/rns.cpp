@@ -1208,8 +1208,7 @@ namespace seal
             const std::uint64_t end_cycles = rdtsc_end();
             const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
             std::printf(
-                "[rdtsc] RNSTool::decrypt_scale_and_round start=%llu end=%llu elapsed=%llu\n",
-                static_cast<unsigned long long>(start_cycles), static_cast<unsigned long long>(end_cycles),
+                "[rdtsc] RNSTool::decrypt_scale_and_round total_elapsed=%llu\n",
                 static_cast<unsigned long long>(decrypt_cycles));
         }
 
