@@ -72,6 +72,9 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
+        std::printf(
+            "[rdtsc] Decryptor::dot_product_ct_sk_array coeff_modulus_size=%zu\n",
+            static_cast<size_t>(coeff_modulus_size));
 
         // Set the secret_key_array to have size 1 (first power of secret)
         // and copy over data
