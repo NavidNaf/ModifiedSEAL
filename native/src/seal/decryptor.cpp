@@ -347,7 +347,7 @@ namespace seal
                 // t1.1 end here
                 const std::uint64_t t1_1_end = rdtsc_end();
                 std::printf(
-                    "[rdtsc] Decryptor::dot_product_ct_sk_array dyadic_product_add_nttform=%llu\n",
+                    "[rdtsc] Decryptor::dot_product_ct_sk_array [1.1][dyadic_product_add_nttform]=%llu\n",
                     static_cast<unsigned long long>(t1_1_end - t1_1_start));
             }
             else
@@ -363,7 +363,7 @@ namespace seal
                         // t1.2.1 end
                         const std::uint64_t t1_2_1_end = rdtsc_end();
                         std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array set_c1_copy=%llu\n",
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.1][set_c1_copy]=%llu\n",
                             static_cast<unsigned long long>(t1_2_1_end - t1_2_1_start));
                         // t1.2.2 start
                         const std::uint64_t t1_2_2_start = rdtsc_begin();
@@ -372,7 +372,7 @@ namespace seal
                         // t1.2.2 end
                         const std::uint64_t t1_2_2_end = rdtsc_end();
                         std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array forward_ntt_c1=%llu\n",
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.2][forward_ntt_c1]=%llu\n",
                             static_cast<unsigned long long>(t1_2_2_end - t1_2_2_start));
                         // t1.2.3 start
                         const std::uint64_t t1_2_3_start = rdtsc_begin();
@@ -381,7 +381,7 @@ namespace seal
                         // t1.2.3 emd
                         const std::uint64_t t1_2_3_end = rdtsc_end();
                         std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array dyadic_product_c1_s=%llu\n",
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.3][dyadic_product_c1_s]=%llu\n",
                             static_cast<unsigned long long>(t1_2_3_end - t1_2_3_start));
                         // t1.2.4 start
                         const std::uint64_t t1_2_4_start = rdtsc_begin();
@@ -390,7 +390,7 @@ namespace seal
                         // t1.2.4 end
                         const std::uint64_t t1_2_4_end = rdtsc_end();
                         std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array inverse_ntt_c1s=%llu\n",
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.4][inverse_ntt_c1s]=%llu\n",
                             static_cast<unsigned long long>(t1_2_4_end - t1_2_4_start));
                         // t1.2.5 start
                         const std::uint64_t t1_2_5_start = rdtsc_begin();
@@ -399,20 +399,20 @@ namespace seal
                         // t1.2.5 end
                         const std::uint64_t t1_2_5_end = rdtsc_end();
                         std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array add_c0_to_result=%llu\n",
+                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.5][add_c0_to_result]=%llu\n",
                             static_cast<unsigned long long>(t1_2_5_end - t1_2_5_start));
                         // print t1.2.1, t1.2.2, t1.2.3, t1.2.4, t1.2.5 
                     });
                 // t1.2 end here
                 const std::uint64_t t1_2_end = rdtsc_end();
                 std::printf(
-                    "[rdtsc] Decryptor::dot_product_ct_sk_array non_ntt_branch=%llu\n",
+                    "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2][non_ntt_branch]=%llu\n",
                     static_cast<unsigned long long>(t1_2_end - t1_2_start));
             }
             // t1 end add here
             const std::uint64_t t1_end = rdtsc_end();
             std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array encrypted_size_2_branch=%llu\n",
+                "[rdtsc] Decryptor::dot_product_ct_sk_array [1][encrypted_size_2_branch]=%llu\n",
                 static_cast<unsigned long long>(t1_end - t1_start));
         }
         else
@@ -433,7 +433,7 @@ namespace seal
             // t2 end add here
             const std::uint64_t t2_end = rdtsc_end();
             std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array forward_ntt_encrypted_copy_if_needed=%llu\n",
+                "[rdtsc] Decryptor::dot_product_ct_sk_array [2][forward_ntt_encrypted_copy_if_needed]=%llu\n",
                 static_cast<unsigned long long>(t2_end - t2_start));
             // Compute dyadic product with secret power array
             // t3 start add here
@@ -445,7 +445,7 @@ namespace seal
             // t3 end add here
             const std::uint64_t t3_end = rdtsc_end();
             std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array dyadic_product_secret_powers=%llu\n",
+                "[rdtsc] Decryptor::dot_product_ct_sk_array [3][dyadic_product_secret_powers]=%llu\n",
                 static_cast<unsigned long long>(t3_end - t3_start));
             // Aggregate all polynomials together to complete the dot product
             set_zero_poly(coeff_count, coeff_modulus_size, destination);
@@ -463,7 +463,7 @@ namespace seal
             // t4 end add here
             const std::uint64_t t4_end = rdtsc_end();
             std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array inverse_ntt_result_if_needed=%llu\n",
+                "[rdtsc] Decryptor::dot_product_ct_sk_array [4][inverse_ntt_result_if_needed]=%llu\n",
                 static_cast<unsigned long long>(t4_end - t4_start));
 
             // Finally add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
