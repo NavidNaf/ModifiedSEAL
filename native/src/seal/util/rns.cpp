@@ -1137,7 +1137,6 @@ namespace seal
 
         void RNSTool::decrypt_scale_and_round(ConstRNSIter input, CoeffIter destination, MemoryPoolHandle pool) const
         {
-            const std::uint64_t start_cycles = rdtsc_begin();
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
@@ -1205,11 +1204,6 @@ namespace seal
                 }
             });
 
-            const std::uint64_t end_cycles = rdtsc_end();
-            const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
-            std::printf(
-                "[rdtsc] RNSTool::decrypt_scale_and_round total_elapsed=%llu\n",
-                static_cast<unsigned long long>(decrypt_cycles));
         }
 
         void RNSTool::mod_t_and_divide_q_last_ntt_inplace(
