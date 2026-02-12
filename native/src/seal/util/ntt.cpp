@@ -389,7 +389,7 @@ namespace seal
 
             NTTTablesCreateIter iter(coeff_count_power, modulus, pool);
             tables = allocate(iter, modulus.size(), pool);
-        }
+        } 
 
         void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
