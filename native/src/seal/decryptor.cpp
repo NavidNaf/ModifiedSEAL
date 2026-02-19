@@ -458,7 +458,7 @@ namespace seal
         const std::uint64_t end_cycles = rdtsc_end();
         const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
         std::printf(
-            "[rdtsc] Decryptor::dot_product_ct_sk_array total_elapsed=%llu\n",
+            "[rdtsc] Decryptor::dot_product_ct_sk_array [0] total_elapsed=%llu\n",
             static_cast<unsigned long long>(decrypt_cycles));
     }
 
