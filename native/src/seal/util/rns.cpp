@@ -1201,16 +1201,16 @@ namespace seal
                     "[rdtsc] RNSTool::decrypt_scale_and_round [1]=%llu\n",
                     static_cast<unsigned long long>(timer_1_end - timer_1_begin));
                 // If this coefficient was non-zero, multiply by gamma^(-1)
-                // const std::uint64_t timer_2_begin = rdtsc_begin();
+                const std::uint64_t timer_2_begin = rdtsc_begin();
                 if (0 != get<2>(I))
                 {
                     // Perform final multiplication by gamma inverse mod t
                     get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
                 }
-                // const std::uint64_t timer_2_end = rdtsc_end();
-                // std::printf(
-                //     "[rdtsc] RNSTool::decrypt_scale_and_round [2]=%llu\n",
-                //     static_cast<unsigned long long>(timer_2_end - timer_2_begin));
+                const std::uint64_t timer_2_end = rdtsc_end();
+                std::printf(
+                    "[rdtsc] RNSTool::decrypt_scale_and_round [2]=%llu\n",
+                    static_cast<unsigned long long>(timer_2_end - timer_2_begin));
             });
 
         }
