@@ -1185,7 +1185,7 @@ namespace seal
             // gamma inverse mod t
             SEAL_ITERATE(iter(temp_t_gamma[0], temp_t_gamma[1], destination), coeff_count_, [&](auto I) {
                 // Need correction because of centered mod
-                // const std::uint64_t timer_1_begin = rdtsc_begin();
+                const std::uint64_t timer_1_begin = rdtsc_begin();
                 if (get<1>(I) > gamma_div_2)
                 {
                     // Compute -(gamma - a) instead of (a - gamma)
@@ -1196,10 +1196,10 @@ namespace seal
                 {
                     get<2>(I) = sub_uint_mod(get<0>(I), barrett_reduce_64(get<1>(I), t_), t_);
                 }
-                // const std::uint64_t timer_1_end = rdtsc_end();
-                // std::printf(
-                //     "[rdtsc] RNSTool::decrypt_scale_and_round [1]=%llu\n",
-                //     static_cast<unsigned long long>(timer_1_end - timer_1_begin));
+                const std::uint64_t timer_1_end = rdtsc_end();
+                std::printf(
+                    "[rdtsc] RNSTool::decrypt_scale_and_round [1]=%llu\n",
+                    static_cast<unsigned long long>(timer_1_end - timer_1_begin));
                 // If this coefficient was non-zero, multiply by gamma^(-1)
                 // const std::uint64_t timer_2_begin = rdtsc_begin();
                 if (0 != get<2>(I))
