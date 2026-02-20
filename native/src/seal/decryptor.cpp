@@ -72,9 +72,6 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
-        std::printf(
-            "[rdtsc] Decryptor::dot_product_ct_sk_array coeff_modulus_size=%zu\n",
-            static_cast<size_t>(coeff_modulus_size));
 
         // Set the secret_key_array to have size 1 (first power of secret)
         // and copy over data
@@ -121,6 +118,7 @@ namespace seal
 
     void Decryptor::bfv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
     {
+        const std::uint64_t start_cycles = rdtsc_begin();
         if (encrypted.is_ntt_form())
         {
             throw invalid_argument("encrypted cannot be in NTT form");
@@ -157,6 +155,11 @@ namespace seal
 
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
+        const std::uint64_t end_cycles = rdtsc_end();
+        const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
+        std::printf(
+            "[rdtsc] Decryptor::bfv_decrypt [1] total_elapsed=%llu\n",
+            static_cast<unsigned long long>(decrypt_cycles));
     }
 
     void Decryptor::ckks_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
@@ -321,22 +324,13 @@ namespace seal
         // Make sure we have enough secret key powers computed
         compute_secret_key_array(encrypted_size - 1);
 
-        const std::uint64_t branch_entry_cycles = rdtsc_begin();
-        std::printf(
-            "[rdtsc] Decryptor::dot_product_ct_sk_array branch_entry_cycles=%llu\n",
-            static_cast<unsigned long long>(branch_entry_cycles));
-
         if (encrypted_size == 2)
         {
             ConstRNSIter secret_key_array(secret_key_array_.get(), coeff_count);
             ConstRNSIter c0(encrypted.data(0), coeff_count);
             ConstRNSIter c1(encrypted.data(1), coeff_count);
-            // t1 start add here
-            const std::uint64_t t1_start = rdtsc_begin();
             if (is_ntt_form)
             {
-                // t1.1 start here
-                const std::uint64_t t1_1_start = rdtsc_begin();
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, destination), coeff_modulus_size, [&](auto I) {
                         // put < c_1 * s > mod q in destination
@@ -344,76 +338,23 @@ namespace seal
                         // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
                         add_poly_coeffmod(get<4>(I), get<0>(I), coeff_count, get<3>(I), get<4>(I));
                     });
-                // t1.1 end here
-                const std::uint64_t t1_1_end = rdtsc_end();
-                std::printf(
-                    "[rdtsc] Decryptor::dot_product_ct_sk_array [1.1][dyadic_product_add_nttform]=%llu\n",
-                    static_cast<unsigned long long>(t1_1_end - t1_1_start));
             }
             else
             {
-                // t1.2 start here
-                const std::uint64_t t1_2_start = rdtsc_begin();
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, ntt_tables, destination), coeff_modulus_size,
                     [&](auto I) {
-                        // t1.2.1 start
-                        const std::uint64_t t1_2_1_start = rdtsc_begin();
                         set_uint(get<1>(I), coeff_count, get<5>(I));
-                        // t1.2.1 end
-                        const std::uint64_t t1_2_1_end = rdtsc_end();
-                        std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.1][set_c1_copy]=%llu\n",
-                            static_cast<unsigned long long>(t1_2_1_end - t1_2_1_start));
-                        // t1.2.2 start
-                        const std::uint64_t t1_2_2_start = rdtsc_begin();
                         // Transform c_1 to NTT form
                         ntt_negacyclic_harvey_lazy(get<5>(I), get<4>(I));
-                        // t1.2.2 end
-                        const std::uint64_t t1_2_2_end = rdtsc_end();
-                        std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.2][forward_ntt_c1]=%llu\n",
-                            static_cast<unsigned long long>(t1_2_2_end - t1_2_2_start));
-                        // t1.2.3 start
-                        const std::uint64_t t1_2_3_start = rdtsc_begin();
                         // put < c_1 * s > mod q in destination
                         dyadic_product_coeffmod(get<5>(I), get<2>(I), coeff_count, get<3>(I), get<5>(I));
-                        // t1.2.3 emd
-                        const std::uint64_t t1_2_3_end = rdtsc_end();
-                        std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.3][dyadic_product_c1_s]=%llu\n",
-                            static_cast<unsigned long long>(t1_2_3_end - t1_2_3_start));
-                        // t1.2.4 start
-                        const std::uint64_t t1_2_4_start = rdtsc_begin();
                         // Transform back
                         inverse_ntt_negacyclic_harvey(get<5>(I), get<4>(I));
-                        // t1.2.4 end
-                        const std::uint64_t t1_2_4_end = rdtsc_end();
-                        std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.4][inverse_ntt_c1s]=%llu\n",
-                            static_cast<unsigned long long>(t1_2_4_end - t1_2_4_start));
-                        // t1.2.5 start
-                        const std::uint64_t t1_2_5_start = rdtsc_begin();
                         // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
                         add_poly_coeffmod(get<5>(I), get<0>(I), coeff_count, get<3>(I), get<5>(I));
-                        // t1.2.5 end
-                        const std::uint64_t t1_2_5_end = rdtsc_end();
-                        std::printf(
-                            "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2.5][add_c0_to_result]=%llu\n",
-                            static_cast<unsigned long long>(t1_2_5_end - t1_2_5_start));
-                        // print t1.2.1, t1.2.2, t1.2.3, t1.2.4, t1.2.5 
                     });
-                // t1.2 end here
-                const std::uint64_t t1_2_end = rdtsc_end();
-                std::printf(
-                    "[rdtsc] Decryptor::dot_product_ct_sk_array [1.2][non_ntt_branch]=%llu\n",
-                    static_cast<unsigned long long>(t1_2_end - t1_2_start));
             }
-            // t1 end add here
-            const std::uint64_t t1_end = rdtsc_end();
-            std::printf(
-                "[rdtsc] Decryptor::dot_product_ct_sk_array [1][encrypted_size_2_branch]=%llu\n",
-                static_cast<unsigned long long>(t1_end - t1_start));
         }
         else
         {
@@ -448,12 +389,6 @@ namespace seal
             // Finally add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
             add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
         }
-
-        const std::uint64_t branch_exit_cycles = rdtsc_end();
-        const std::uint64_t branch_total_cycles = branch_exit_cycles - branch_entry_cycles;
-        std::printf(
-            "[rdtsc] Decryptor::dot_product_ct_sk_array branch_total=%llu\n",
-            static_cast<unsigned long long>(branch_total_cycles));
 
         const std::uint64_t end_cycles = rdtsc_end();
         const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
