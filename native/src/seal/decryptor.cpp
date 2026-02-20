@@ -141,14 +141,25 @@ namespace seal
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
+
+        const std::uint64_t t_1_1_begin = rdtsc_begin();
         dot_product_ct_sk_array(encrypted, tmp_dest_modq, pool_);
+        const std::uint64_t t_1_1_end = rdtsc_end();
+        std::printf(
+            "[rdtsc] Decryptor::bfv_decrypt [1.1][dot_product_ct_sk_array]=%llu\n",
+            static_cast<unsigned long long>(t_1_1_end - t_1_1_begin));
 
         // Allocate a full size destination to write to
         destination.parms_id() = parms_id_zero;
         destination.resize(coeff_count);
 
         // Divide scaling variant using BEHZ FullRNS techniques
+        const std::uint64_t t_1_2_begin = rdtsc_begin();
         context_data.rns_tool()->decrypt_scale_and_round(tmp_dest_modq, destination.data(), pool);
+        const std::uint64_t t_1_2_end = rdtsc_end();
+        std::printf(
+            "[rdtsc] Decryptor::bfv_decrypt [1.2][rnstool]=%llu\n",
+            static_cast<unsigned long long>(t_1_2_end - t_1_2_begin));
 
         // How many non-zero coefficients do we really have in the result?
         size_t plain_coeff_count = get_significant_uint64_count_uint(destination.data(), coeff_count);
@@ -309,7 +320,6 @@ namespace seal
     // Store result in destination in RNS form.
     void Decryptor::dot_product_ct_sk_array(const Ciphertext &encrypted, RNSIter destination, MemoryPoolHandle pool)
     {
-        const std::uint64_t start_cycles = rdtsc_begin();
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
@@ -390,11 +400,6 @@ namespace seal
             add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
         }
 
-        const std::uint64_t end_cycles = rdtsc_end();
-        const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
-        std::printf(
-            "[rdtsc] Decryptor::dot_product_ct_sk_array [0] total_elapsed=%llu\n",
-            static_cast<unsigned long long>(decrypt_cycles));
     }
 
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
