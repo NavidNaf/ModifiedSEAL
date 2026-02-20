@@ -118,7 +118,6 @@ namespace seal
 
     void Decryptor::bfv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
     {
-        const std::uint64_t start_cycles = rdtsc_begin();
         if (encrypted.is_ntt_form())
         {
             throw invalid_argument("encrypted cannot be in NTT form");
@@ -142,12 +141,7 @@ namespace seal
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
 
-        const std::uint64_t t_1_1_begin = rdtsc_begin();
         dot_product_ct_sk_array(encrypted, tmp_dest_modq, pool_);
-        const std::uint64_t t_1_1_end = rdtsc_end();
-        std::printf(
-            "[rdtsc] Decryptor::bfv_decrypt [1.1][dot_product_ct_sk_array]=%llu\n",
-            static_cast<unsigned long long>(t_1_1_end - t_1_1_begin));
 
         // Allocate a full size destination to write to
         destination.parms_id() = parms_id_zero;
@@ -166,11 +160,6 @@ namespace seal
 
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
-        const std::uint64_t end_cycles = rdtsc_end();
-        const std::uint64_t decrypt_cycles = end_cycles - start_cycles;
-        std::printf(
-            "[rdtsc] Decryptor::bfv_decrypt [1] total_elapsed=%llu\n",
-            static_cast<unsigned long long>(decrypt_cycles));
     }
 
     void Decryptor::ckks_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
