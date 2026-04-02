@@ -8,8 +8,12 @@
 #include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintarith.h"
+#include <cstdio>
 #include <cstdint>
 #include <type_traits>
+
+extern uint64_t rdtsc_begin();
+extern uint64_t rdtsc_end();
 
 namespace seal
 {
@@ -257,18 +261,21 @@ namespace seal
             std::uint64_t operand;
             std::uint64_t quotient;
 
+            // Precomputes quotient for the given operand and modulus. Operand must be less than modulus.
             void set_quotient(const Modulus &modulus)
             {
 #ifdef SEAL_DEBUG
+                // This optimized path assumes the cached operand is already reduced modulo p.
                 if (operand >= modulus.value())
                 {
                     throw std::invalid_argument("input must be less than modulus");
                 }
 #endif
-                std::uint64_t wide_quotient[2]{ 0, 0 };
-                std::uint64_t wide_coeff[2]{ 0, operand };
-                divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
-                quotient = wide_quotient[0];
+                // Compute floor((operand << 64) / modulus) using 128-bit division
+                std::uint64_t wide_quotient[2]{ 0, 0 }; // operand is in the low half of the 128-bit numerator, so we can set the high half to zero.
+                std::uint64_t wide_coeff[2]{ 0, operand }; // 128-bit numerator for the division, with operand in the low half and zero in the high half.
+                divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient); // quotient is the result of the division
+                quotient = wide_quotient[0]; // We only need the low 64 bits of the quotient, since modulus is at most 63-bit and thus the quotient must be less than 2^64.
             }
 
             void set(std::uint64_t new_operand, const Modulus &modulus)
@@ -289,10 +296,13 @@ namespace seal
         This is a highly-optimized variant of Barrett reduction.
         Correctness: modulus should be at most 63-bit, and y must be less than modulus.
         */
+
+        // target function that leaks in time for values 0 and 1 in ciphertext.
         SEAL_NODISCARD inline std::uint64_t multiply_uint_mod(
             std::uint64_t x, MultiplyUIntModOperand y, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
+            // This optimized path assumes the cached operand in y is already reduced modulo p.
             if (y.operand >= modulus.value())
             {
                 throw std::invalid_argument("operand y must be less than modulus");
@@ -300,9 +310,38 @@ namespace seal
 #endif
             unsigned long long tmp1, tmp2;
             const std::uint64_t p = modulus.value();
+
+            // F1
+
+            // y.quotient stores a precomputed approximation of (y.operand << 64) / p.
+            // Multiplying x by that quotient gives the high-half estimate used in fast Barrett reduction.
+            // hw64 stands for "high word of 64-bit multiplication".
+
+            const std::uint64_t f1_begin = rdtsc_begin();
             multiply_uint64_hw64(x, y.quotient, &tmp1);
+            const std::uint64_t f1_end = rdtsc_end();
+            std::printf(
+                "[rdtsc] multiply_uint_mod F1(hw64)=%llu\n",
+                static_cast<unsigned long long>(f1_end - f1_begin));
+
+            // F2
+            // Subtract the estimated multiple of p from x * y.operand to land close to the final residue.
+            const std::uint64_t f2_begin = rdtsc_begin();
             tmp2 = y.operand * x - tmp1 * p;
-            return SEAL_COND_SELECT(tmp2 >= p, tmp2 - p, tmp2);
+            const std::uint64_t f2_end = rdtsc_end();
+            std::printf(
+                "[rdtsc] multiply_uint_mod F2(tmp2)=%llu\n",
+                static_cast<unsigned long long>(f2_end - f2_begin));
+
+            // F3
+            // One final subtraction is enough to bring the result into the canonical range [0, p).
+            const std::uint64_t f3_begin = rdtsc_begin();
+            std::uint64_t result = SEAL_COND_SELECT(tmp2 >= p, tmp2 - p, tmp2);
+            const std::uint64_t f3_end = rdtsc_end();
+            std::printf(
+                "[rdtsc] multiply_uint_mod F3(result)=%llu\n",
+                static_cast<unsigned long long>(f3_end - f3_begin));
+            return result;
         }
 
         /**
