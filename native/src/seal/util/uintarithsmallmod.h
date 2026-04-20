@@ -317,21 +317,21 @@ namespace seal
             // Multiplying x by that quotient gives the high-half estimate used in fast Barrett reduction.
             // hw64 stands for "high word of 64-bit multiplication".
 
-            const std::uint64_t f1_begin = rdtsc_begin();
+            // const std::uint64_t f1_begin = rdtsc_begin();
             multiply_uint64_hw64(x, y.quotient, &tmp1);
-            const std::uint64_t f1_end = rdtsc_end();
-            std::printf(
-                "[rdtsc] multiply_uint_mod F1(hw64)=%llu\n",
-                static_cast<unsigned long long>(f1_end - f1_begin));
+            // const std::uint64_t f1_end = rdtsc_end();
+            // std::printf(
+            //     "[rdtsc] multiply_uint_mod F1(hw64)=%llu\n",
+            //     static_cast<unsigned long long>(f1_end - f1_begin));
 
             // F2
             // Subtract the estimated multiple of p from x * y.operand to land close to the final residue.
-            // const std::uint64_t f2_begin = rdtsc_begin();
+            const std::uint64_t f2_begin = rdtsc_begin();
             tmp2 = y.operand * x - tmp1 * p;
-            // const std::uint64_t f2_end = rdtsc_end();
-            // std::printf(
-            //     "[rdtsc] multiply_uint_mod F2(tmp2)=%llu\n",
-            //     static_cast<unsigned long long>(f2_end - f2_begin));
+            const std::uint64_t f2_end = rdtsc_end();
+            std::printf(
+                "[rdtsc] multiply_uint_mod F2(tmp2)=%llu\n",
+                static_cast<unsigned long long>(f2_end - f2_begin));
 
             // F3
             // One final subtraction is enough to bring the result into the canonical range [0, p).
