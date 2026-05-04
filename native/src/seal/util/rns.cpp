@@ -1197,16 +1197,15 @@ namespace seal
                 }
                 // If this coefficient was non-zero, multiply by gamma^(-1)
                 if (0 != get<2>(I))
-                {   
-                    // Experimentation Timing for the Main Branch
-                    // Measure only the final multiplication by gamma^(-1) modulo t for this coefficient.
-                    const std::uint64_t gamma_inv_begin = rdtsc_begin();
+                {
+                    // Timing disabled: uncomment these lines to measure only the final multiplication by
+                    // gamma^(-1) modulo t for this coefficient.
+                    // const std::uint64_t gamma_inv_begin = rdtsc_begin();
                     get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
-                    const std::uint64_t gamma_inv_end = rdtsc_end();
-                    // Print the per-coefficient cycle count for the gamma inverse multiplication.
-                    std::printf(
-                        "[rdtsc] RNSTool::decrypt_scale_and_round gamma_inv_multiply=%llu\n",
-                        static_cast<unsigned long long>(gamma_inv_end - gamma_inv_begin));
+                    // const std::uint64_t gamma_inv_end = rdtsc_end();
+                    // std::printf(
+                    //     "[rdtsc] RNSTool::decrypt_scale_and_round gamma_inv_multiply=%llu\n",
+                    //     static_cast<unsigned long long>(gamma_inv_end - gamma_inv_begin));
                 }
             });
 
