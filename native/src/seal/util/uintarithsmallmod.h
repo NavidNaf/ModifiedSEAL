@@ -8,12 +8,8 @@
 #include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintarith.h"
-#include <cstdio>
 #include <cstdint>
 #include <type_traits>
-
-extern uint64_t rdtsc_begin();
-extern uint64_t rdtsc_end();
 
 namespace seal
 {
@@ -311,37 +307,16 @@ namespace seal
             unsigned long long tmp1, tmp2;
             const std::uint64_t p = modulus.value();
 
-            // F1
-
             // y.quotient stores a precomputed approximation of (y.operand << 64) / p.
             // Multiplying x by that quotient gives the high-half estimate used in fast Barrett reduction.
             // hw64 stands for "high word of 64-bit multiplication".
-
-            // const std::uint64_t f1_begin = rdtsc_begin();
             multiply_uint64_hw64(x, y.quotient, &tmp1);
-            // const std::uint64_t f1_end = rdtsc_end();
-            // std::printf(
-            //     "[rdtsc] multiply_uint_mod F1(hw64)=%llu\n",
-            //     static_cast<unsigned long long>(f1_end - f1_begin));
 
-            // F2
             // Subtract the estimated multiple of p from x * y.operand to land close to the final residue.
-            // const std::uint64_t f2_begin = rdtsc_begin();
             tmp2 = y.operand * x - tmp1 * p;
-            // const std::uint64_t f2_end = rdtsc_end();
-            // std::printf(
-            //     "[rdtsc] multiply_uint_mod F2(tmp2)=%llu\n",
-            //     static_cast<unsigned long long>(f2_end - f2_begin));
 
-            // F3
             // One final subtraction is enough to bring the result into the canonical range [0, p).
-            const std::uint64_t f3_begin = rdtsc_begin();
-            std::uint64_t result = SEAL_COND_SELECT(tmp2 >= p, tmp2 - p, tmp2);
-            const std::uint64_t f3_end = rdtsc_end();
-            std::printf(
-                "[rdtsc] multiply_uint_mod F3(result)=%llu\n",
-                static_cast<unsigned long long>(f3_end - f3_begin));
-            return result;
+            return SEAL_COND_SELECT(tmp2 >= p, tmp2 - p, tmp2);
         }
 
         /**

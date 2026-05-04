@@ -152,7 +152,7 @@ namespace seal
         context_data.rns_tool()->decrypt_scale_and_round(tmp_dest_modq, destination.data(), pool);
         const std::uint64_t t_1_2_end = rdtsc_end();
         std::printf(
-            "[rdtsc] Decryptor::bfv_decrypt [1.2][rnstool]=%llu\n",
+            "[rdtsc] decrypt_scale_and_round_cycles=%llu\n",
             static_cast<unsigned long long>(t_1_2_end - t_1_2_begin));
 
         // How many non-zero coefficients do we really have in the result?
